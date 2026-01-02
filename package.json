@@ -1,0 +1,9 @@
+{
+  "name": "serverhop-v2",
+  "version": "1.0.0",
+  "description": "Roblox server hopping proxy",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  }
+}
