@@ -6,8 +6,8 @@ const PORT = process.env.PORT || 3000;
 /* ================================
    🔧 CONFIG
 ================================ */
-const PLACE_ID = "104524115833006"; // 🔁 CHANGE THIS TO YOUR NEW PLACE ID
-const CACHE_DURATION_MS = 60 * 1000; // 1 minute
+const PLACE_ID = "104524115833006"; // YOUR PLACE ID
+const CACHE_DURATION_MS = 60 * 1000;
 
 /* ================================
    🧠 CACHE
@@ -31,7 +31,7 @@ app.get("/", (req, res) => {
 app.get("/servers", async (req, res) => {
   const now = Date.now();
 
-  // Serve cache if still valid
+  // Serve cached data
   if (cachedServers.data.length > 0 && now - lastFetchTime < CACHE_DURATION_MS) {
     return res.json({
       ...cachedServers,
@@ -42,17 +42,14 @@ app.get("/servers", async (req, res) => {
 
   try {
     const url = `https://games.roblox.com/v1/games/${PLACE_ID}/servers/Public?sortOrder=Asc&limit=100`;
-
     const response = await fetch(url);
 
-    // 🚫 Rate limit handling
     if (response.status === 429) {
-      console.warn("⚠️ Roblox API rate-limited.");
-
+      console.warn("⚠️ Roblox rate limited");
       return res.json({
         ...cachedServers,
         cached: true,
-        message: "Rate limited by Roblox — serving cached data.",
+        message: "Rate limited — using cached data.",
       });
     }
 
@@ -62,7 +59,6 @@ app.get("/servers", async (req, res) => {
 
     const data = await response.json();
 
-    // ✅ Validate response
     if (data && Array.isArray(data.data)) {
       cachedServers = data;
       lastFetchTime = now;
@@ -74,13 +70,10 @@ app.get("/servers", async (req, res) => {
       });
     }
 
-    // Unexpected format fallback
-    console.warn("⚠️ Unexpected Roblox API response format");
-
     return res.json({
       ...cachedServers,
       cached: true,
-      message: "Unexpected response — serving cached data.",
+      message: "Unexpected response format.",
     });
 
   } catch (err) {
